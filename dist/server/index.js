@@ -2530,10 +2530,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(__webpack_require__(470));
 const exec = __importStar(__webpack_require__(986));
-const io = __importStar(__webpack_require__(1));
+const path_1 = __importDefault(__webpack_require__(622));
 const constants_1 = __webpack_require__(694);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -2541,46 +2544,44 @@ function run() {
         const api_hash = core.getInput(constants_1.Inputs.ApiHash, { required: true });
         const port = core.getInput(constants_1.Inputs.Port);
         const data_dir = constants_1.BotFilePaths.Data;
-        const tbotfiles = "../../tbotfiles";
         const server = `http://127.0.0.1:${port}`;
-        const workspace = "./workspace";
+        const repo_path = path_1.default.resolve(__dirname, "..", "..");
+        const tbotfiles = `${repo_path}/tbotfiles`;
         core.setSecret(api_id);
         core.setSecret(api_hash);
         core.saveState(constants_1.State.CacheDataDirKey, data_dir);
         core.setOutput(constants_1.Outputs.Server, server);
-        yield io.mkdirP(workspace);
-        yield io.cp(tbotfiles, workspace, { recursive: true });
         core.info("Start setup bot server.");
         yield exec.exec("sed", [
             "-i",
             `s@\${TID}@${api_id}@g`,
-            `${workspace}/${constants_1.BotFileNames.Service}`
+            `${tbotfiles}/${constants_1.BotFileNames.Service}`
         ]);
         yield exec.exec("sed", [
             "-i",
             `s@\${THASH}@${api_hash}@g`,
-            `${workspace}/${constants_1.BotFileNames.Service}`
+            `${tbotfiles}/${constants_1.BotFileNames.Service}`
         ]);
         yield exec.exec("sed", [
             "-i",
             `s@\${TPORT}@${port}@g`,
-            `${workspace}/${constants_1.BotFileNames.Service}`
+            `${tbotfiles}/${constants_1.BotFileNames.Service}`
         ]);
         yield exec.exec("sed", [
             "-i",
             `s@\${TDATA}@${data_dir}@g`,
-            `${workspace}/${constants_1.BotFileNames.Service}`
+            `${tbotfiles}/${constants_1.BotFileNames.Service}`
         ]);
         const bin_file = `${constants_1.BotFilePaths.Bin}/${constants_1.BotFileNames.Bin}`;
-        const service_file = `${constants_1.BotFilePaths.Bin}/${constants_1.BotFileNames.Service}`;
+        const service_file = `${constants_1.BotFilePaths.Service}/${constants_1.BotFileNames.Service}`;
         yield exec.exec("sudo", [
             "cp",
-            `${workspace}/${constants_1.BotFileNames.Bin}`,
+            `${tbotfiles}/${constants_1.BotFileNames.Bin}`,
             bin_file
         ]);
         yield exec.exec("sudo", [
             "cp",
-            `${workspace}/${constants_1.BotFileNames.Service}`,
+            `${tbotfiles}/${constants_1.BotFileNames.Service}`,
             service_file
         ]);
         yield exec.exec("sudo", ["chmod", "755", bin_file]);

@@ -1,6 +1,6 @@
 import * as core from "@actions/core";
 import * as exec from "@actions/exec";
-import * as io from "@actions/io";
+import path from "path";
 
 import {
     BotFileNames,
@@ -16,9 +16,9 @@ async function run(): Promise<void> {
     const port = core.getInput(Inputs.Port);
     const data_dir = BotFilePaths.Data;
 
-    const tbotfiles = "../../tbotfiles";
     const server = `http://127.0.0.1:${port}`;
-    const workspace = "./workspace";
+    const repo_path = path.resolve(__dirname, "..", "..");
+    const tbotfiles = `${repo_path}/tbotfiles`;
 
     core.setSecret(api_id);
     core.setSecret(api_hash);
@@ -27,41 +27,38 @@ async function run(): Promise<void> {
 
     core.setOutput(Outputs.Server, server);
 
-    await io.mkdirP(workspace);
-    await io.cp(tbotfiles, workspace, { recursive: true });
-
     core.info("Start setup bot server.");
     await exec.exec("sed", [
         "-i",
         `s@\${TID}@${api_id}@g`,
-        `${workspace}/${BotFileNames.Service}`
+        `${tbotfiles}/${BotFileNames.Service}`
     ]);
     await exec.exec("sed", [
         "-i",
         `s@\${THASH}@${api_hash}@g`,
-        `${workspace}/${BotFileNames.Service}`
+        `${tbotfiles}/${BotFileNames.Service}`
     ]);
     await exec.exec("sed", [
         "-i",
         `s@\${TPORT}@${port}@g`,
-        `${workspace}/${BotFileNames.Service}`
+        `${tbotfiles}/${BotFileNames.Service}`
     ]);
     await exec.exec("sed", [
         "-i",
         `s@\${TDATA}@${data_dir}@g`,
-        `${workspace}/${BotFileNames.Service}`
+        `${tbotfiles}/${BotFileNames.Service}`
     ]);
 
     const bin_file = `${BotFilePaths.Bin}/${BotFileNames.Bin}`;
-    const service_file = `${BotFilePaths.Bin}/${BotFileNames.Service}`;
+    const service_file = `${BotFilePaths.Service}/${BotFileNames.Service}`;
     await exec.exec("sudo", [
         "cp",
-        `${workspace}/${BotFileNames.Bin}`,
+        `${tbotfiles}/${BotFileNames.Bin}`,
         bin_file
     ]);
     await exec.exec("sudo", [
         "cp",
-        `${workspace}/${BotFileNames.Service}`,
+        `${tbotfiles}/${BotFileNames.Service}`,
         service_file
     ]);
     await exec.exec("sudo", ["chmod", "755", bin_file]);
