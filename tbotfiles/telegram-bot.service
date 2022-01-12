@@ -1,0 +1,12 @@
+[Unit]
+Description=Telegram Bot Server
+After=network-online.target network.target
+
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/local/bin/telegram-bot-api --local --http-ip-address=127.0.0.1 --api-id=${TID} --api-hash=${THASH} --http-port=${TPORT} --dir=${TDATA} --temp-dir=${TDATA}/temp
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target

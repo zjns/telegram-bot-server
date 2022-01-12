@@ -1,0 +1,23 @@
+name: 'Telegram Bot Server'
+description: 'Deploy telegram bot server in github workflows.'
+inputs:
+  api_id:
+    description: 'Telegram api_id'
+    required: true
+  api_hash:
+    description: 'Telegram api_hash'
+    required: true
+  server-port:
+    description: 'Local server port to deploy'
+    required: false
+    default: '8088'
+outputs:
+  server:
+    description: 'Server address'
+runs:
+  using: 'node16'
+  main: 'dist/server/index.js'
+  post: 'dist/cleanup/index.js'
+branding:
+  icon: 'archive'
+  color: 'gray-dark'
